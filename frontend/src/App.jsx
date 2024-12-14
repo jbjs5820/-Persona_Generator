@@ -4,6 +4,7 @@ import ProjectForm from './components/ProjectForm'
 import PersonaForm from './components/PersonaForm'
 import PersonaList from './components/PersonaList'
 import PersonaDetails from './components/PersonaDetails'
+import ProjectDetails from './components/ProjectDetails'
 import './App.css'
 
 function App() {
@@ -132,6 +133,8 @@ function App() {
 
         {selectedProject && (
           <>
+            <ProjectDetails project={selectedProject} />
+            
             <div className="card">
               <h2 className="text-2xl font-bold mb-4">
                 <span role="img" aria-label="create">✨</span> Create Persona
