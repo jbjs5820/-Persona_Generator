@@ -51,35 +51,41 @@ const PersonaDetails = ({ persona, onClose }) => {
 
           <div className="space-y-2">
             <h3 className="text-lg font-semibold text-white">Goals</h3>
-            <ul className="list-disc list-inside text-gray-300 space-y-1">
-              {persona.goals.map((goal, index) => (
-                <li key={index}>{goal}</li>
-              ))}
-            </ul>
+            <div className="text-gray-300 space-y-1">
+              {typeof persona.goals === 'string' ? (
+                <p>{persona.goals}</p>
+              ) : (
+                <ul className="list-disc list-inside">
+                  {Array.isArray(persona.goals) && persona.goals.map((goal, index) => (
+                    <li key={index}>{goal}</li>
+                  ))}
+                </ul>
+              )}
+            </div>
           </div>
 
           <div className="space-y-2">
             <h3 className="text-lg font-semibold text-white">Pain Points</h3>
-            <ul className="list-disc list-inside text-gray-300 space-y-1">
-              {persona.painPoints.map((point, index) => (
-                <li key={index}>{point}</li>
-              ))}
-            </ul>
+            <div className="text-gray-300 space-y-1">
+              {typeof persona.painPoints === 'string' ? (
+                <p>{persona.painPoints}</p>
+              ) : (
+                <ul className="list-disc list-inside">
+                  {Array.isArray(persona.painPoints) && persona.painPoints.map((point, index) => (
+                    <li key={index}>{point}</li>
+                  ))}
+                </ul>
+              )}
+            </div>
           </div>
         </div>
 
         <div className="mt-8 flex justify-end space-x-4">
           <button
             onClick={onClose}
-            className="btn btn-secondary"
+            className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors"
           >
             Close
-          </button>
-          <button
-            className="btn btn-primary"
-            onClick={() => {/* TODO: Implement export functionality */}}
-          >
-            Export
           </button>
         </div>
       </div>

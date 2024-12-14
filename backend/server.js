@@ -117,6 +117,40 @@ app.get('/api/projects/:projectId/personas', (req, res) => {
   res.json(allPersonas);
 });
 
+app.put('/api/projects/:projectId/personas/:personaId', (req, res) => {
+  const { projectId, personaId } = req.params;
+  const updates = req.body;
+  
+  if (!personas[projectId]) {
+    return res.status(404).json({ error: 'Project not found' });
+  }
+
+  // Search in both base and generated personas
+  const baseIndex = personas[projectId].base.findIndex(p => p.id === personaId);
+  const generatedIndex = personas[projectId].generated.findIndex(p => p.id === personaId);
+
+  if (baseIndex === -1 && generatedIndex === -1) {
+    return res.status(404).json({ error: 'Persona not found' });
+  }
+
+  // Update the persona in the appropriate array
+  if (baseIndex !== -1) {
+    personas[projectId].base[baseIndex] = {
+      ...personas[projectId].base[baseIndex],
+      ...updates,
+      updatedAt: new Date().toISOString()
+    };
+    res.json(personas[projectId].base[baseIndex]);
+  } else {
+    personas[projectId].generated[generatedIndex] = {
+      ...personas[projectId].generated[generatedIndex],
+      ...updates,
+      updatedAt: new Date().toISOString()
+    };
+    res.json(personas[projectId].generated[generatedIndex]);
+  }
+});
+
 app.post('/api/projects/:projectId/personas/generate', async (req, res) => {
   const { projectId } = req.params;
   console.log('Starting persona generation for project:', projectId);

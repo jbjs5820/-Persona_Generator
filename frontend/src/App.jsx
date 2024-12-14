@@ -87,6 +87,12 @@ function App() {
     }
   };
 
+  const handlePersonaUpdate = (updatedPersona) => {
+    setPersonas(personas.map(p => 
+      p.id === updatedPersona.id ? updatedPersona : p
+    ));
+  };
+
   return (
     <div className="container">
       <header className="app-header">
@@ -167,6 +173,8 @@ function App() {
         <PersonaDetails
           persona={selectedPersona}
           onClose={() => setSelectedPersona(null)}
+          projectId={selectedProject?.id}
+          onPersonaUpdate={handlePersonaUpdate}
           onExport={handleExportPersona}
         />
       )}

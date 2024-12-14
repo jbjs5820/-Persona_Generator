@@ -32,8 +32,8 @@ const PersonaList = ({ personas, onPersonaClick }) => {
                 <span className="font-medium">Occupation:</span> {persona.occupation}
               </p>
               <p className="text-sm text-gray-300">
-                <span role="img" aria-label="background">📍</span>{' '}
-                <span className="font-medium">Background:</span> {persona.background}
+                <span role="img" aria-label="location">📍</span>{' '}
+                <span className="font-medium">Location:</span> {persona.location}
               </p>
             </div>
             <div className="mt-4 flex justify-end">
