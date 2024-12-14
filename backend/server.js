@@ -65,14 +65,14 @@ app.get('/api/test-openai', async (req, res) => {
 app.post('/api/projects', (req, res) => {
   const { name, description } = req.body;
   const project = {
-    id: Date.now().toString(),
+    _id: Date.now().toString(),
     name,
     description,
     createdAt: new Date().toISOString(),
     status: 'New'
   };
   projects.push(project);
-  personas[project.id] = {
+  personas[project._id] = {
     base: [],
     generated: []
   };
@@ -83,72 +83,57 @@ app.get('/api/projects', (req, res) => {
   res.json(projects);
 });
 
+app.get('/api/projects/:projectId', (req, res) => {
+  const project = projects.find(p => p._id === req.params.projectId);
+  if (!project) {
+    return res.status(404).json({ error: 'Project not found' });
+  }
+  res.json(project);
+});
+
 // Personas Routes
 app.post('/api/projects/:projectId/personas', (req, res) => {
   const { projectId } = req.params;
-  const personaData = req.body;
-
-  if (!personas[projectId]) {
-    return res.status(404).json({ error: 'Project not found' });
-  }
-
   const persona = {
-    id: Date.now().toString(),
-    ...personaData,
+    _id: Date.now().toString(),
+    ...req.body,
     createdAt: new Date().toISOString()
   };
-
+  
+  if (!personas[projectId]) {
+    personas[projectId] = { base: [], generated: [] };
+  }
+  
   personas[projectId].base.push(persona);
   res.json(persona);
 });
 
 app.get('/api/projects/:projectId/personas', (req, res) => {
   const { projectId } = req.params;
-  
-  if (!personas[projectId]) {
-    return res.status(404).json({ error: 'Project not found' });
-  }
-
-  const allPersonas = [
-    ...personas[projectId].base,
-    ...personas[projectId].generated
-  ];
-
-  res.json(allPersonas);
+  const projectPersonas = personas[projectId] || { base: [], generated: [] };
+  res.json([...projectPersonas.base, ...projectPersonas.generated]);
 });
 
 app.put('/api/projects/:projectId/personas/:personaId', (req, res) => {
   const { projectId, personaId } = req.params;
-  const updates = req.body;
+  const projectPersonas = personas[projectId];
   
-  if (!personas[projectId]) {
+  if (!projectPersonas) {
     return res.status(404).json({ error: 'Project not found' });
   }
 
-  // Search in both base and generated personas
-  const baseIndex = personas[projectId].base.findIndex(p => p.id === personaId);
-  const generatedIndex = personas[projectId].generated.findIndex(p => p.id === personaId);
-
-  if (baseIndex === -1 && generatedIndex === -1) {
+  const personaIndex = projectPersonas.base.findIndex(p => p._id === personaId);
+  if (personaIndex === -1) {
     return res.status(404).json({ error: 'Persona not found' });
   }
 
-  // Update the persona in the appropriate array
-  if (baseIndex !== -1) {
-    personas[projectId].base[baseIndex] = {
-      ...personas[projectId].base[baseIndex],
-      ...updates,
-      updatedAt: new Date().toISOString()
-    };
-    res.json(personas[projectId].base[baseIndex]);
-  } else {
-    personas[projectId].generated[generatedIndex] = {
-      ...personas[projectId].generated[generatedIndex],
-      ...updates,
-      updatedAt: new Date().toISOString()
-    };
-    res.json(personas[projectId].generated[generatedIndex]);
-  }
+  projectPersonas.base[personaIndex] = {
+    ...projectPersonas.base[personaIndex],
+    ...req.body,
+    _id: personaId
+  };
+
+  res.json(projectPersonas.base[personaIndex]);
 });
 
 app.post('/api/projects/:projectId/personas/generate', async (req, res) => {
@@ -167,7 +152,7 @@ app.post('/api/projects/:projectId/personas/generate', async (req, res) => {
 
   try {
     const basePersonas = personas[projectId].base;
-    const project = projects.find(p => p.id === projectId);
+    const project = projects.find(p => p._id === projectId);
     console.log('Base personas:', basePersonas.length);
     const remainingCount = 10; 
     const generatedPersonas = [];
@@ -252,7 +237,7 @@ app.get('/api/projects/:projectId/personas/:personaId/export', async (req, res) 
       return res.status(404).json({ error: 'Project not found' });
     }
 
-    const persona = projectPersonas.find(p => p.id === personaId);
+    const persona = projectPersonas.base.find(p => p._id === personaId) || projectPersonas.generated.find(p => p._id === personaId);
     if (!persona) {
       return res.status(404).json({ error: 'Persona not found' });
     }

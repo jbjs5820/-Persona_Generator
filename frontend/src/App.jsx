@@ -5,6 +5,7 @@ import PersonaForm from './components/PersonaForm'
 import PersonaList from './components/PersonaList'
 import PersonaDetails from './components/PersonaDetails'
 import ProjectDetails from './components/ProjectDetails'
+import Reports from './components/Reports'
 import './App.css'
 
 function App() {
@@ -20,7 +21,7 @@ function App() {
 
   useEffect(() => {
     if (selectedProject) {
-      fetchPersonas(selectedProject.id);
+      fetchPersonas(selectedProject._id);
     }
   }, [selectedProject]);
 
@@ -58,7 +59,7 @@ function App() {
 
     try {
       setIsGenerating(true);
-      const response = await axios.post(`http://localhost:5001/api/projects/${selectedProject.id}/personas/generate`);
+      const response = await axios.post(`http://localhost:5001/api/projects/${selectedProject._id}/personas/generate`);
       setPersonas([...personas, ...response.data]);
     } catch (error) {
       console.error('Error generating personas:', error);
@@ -71,7 +72,7 @@ function App() {
   const handleExportPersona = async (persona) => {
     try {
       const response = await axios.get(
-        `http://localhost:5001/api/projects/${selectedProject.id}/personas/${persona.id}/export`,
+        `http://localhost:5001/api/projects/${selectedProject._id}/personas/${persona._id}/export`,
         { responseType: 'blob' }
       );
       
@@ -90,7 +91,7 @@ function App() {
 
   const handlePersonaUpdate = (updatedPersona) => {
     setPersonas(personas.map(p => 
-      p.id === updatedPersona.id ? updatedPersona : p
+      p._id === updatedPersona._id ? updatedPersona : p
     ));
   };
 
@@ -114,15 +115,15 @@ function App() {
               <label className="form-label">Select Project:</label>
               <select
                 className="form-input"
-                value={selectedProject?.id || ''}
+                value={selectedProject?._id || ''}
                 onChange={(e) => {
-                  const project = projects.find(p => p.id === e.target.value);
+                  const project = projects.find(p => p._id === e.target.value);
                   setSelectedProject(project);
                 }}
               >
                 <option value="">Select a project...</option>
                 {projects.map((project) => (
-                  <option key={project.id} value={project.id}>
+                  <option key={project._id} value={project._id}>
                     {project.name}
                   </option>
                 ))}
@@ -132,15 +133,15 @@ function App() {
         </div>
 
         {selectedProject && (
-          <>
+          <div>
             <ProjectDetails project={selectedProject} />
-            
+            <Reports personas={personas} />
             <div className="card">
               <h2 className="text-2xl font-bold mb-4">
                 <span role="img" aria-label="create">✨</span> Create Persona
               </h2>
               <PersonaForm
-                projectId={selectedProject.id}
+                projectId={selectedProject._id}
                 onPersonaCreated={handlePersonaCreated}
               />
             </div>
@@ -168,7 +169,7 @@ function App() {
               personas={personas}
               onPersonaClick={setSelectedPersona}
             />
-          </>
+          </div>
         )}
       </div>
 
@@ -176,7 +177,7 @@ function App() {
         <PersonaDetails
           persona={selectedPersona}
           onClose={() => setSelectedPersona(null)}
-          projectId={selectedProject?.id}
+          projectId={selectedProject?._id}
           onPersonaUpdate={handlePersonaUpdate}
           onExport={handleExportPersona}
         />
