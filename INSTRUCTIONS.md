@@ -85,7 +85,7 @@ my-personas-app/
     Use Tailwind CSS for styling and include proper TypeScript types."
     ```
 
-3.2. [ ] Create report generation system
+3.2. [x] Create report generation system
     ```
     Prompt: "Develop a report generation system that:
     - Analyzes 100 personas
