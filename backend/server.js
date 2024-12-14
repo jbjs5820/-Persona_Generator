@@ -133,6 +133,7 @@ app.post('/api/projects/:projectId/personas/generate', async (req, res) => {
 
   try {
     const basePersonas = personas[projectId].base;
+    const project = projects.find(p => p.id === projectId);
     console.log('Base personas:', basePersonas.length);
     const remainingCount = 10; 
     const generatedPersonas = [];
@@ -140,7 +141,9 @@ app.post('/api/projects/:projectId/personas/generate', async (req, res) => {
     for (let i = 0; i < remainingCount; i += 2) {
       console.log(`Generating batch ${i/2 + 1}`);
       const batchSize = Math.min(2, remainingCount - i);
-      const prompt = `Based on these ${basePersonas.length} base personas: ${JSON.stringify(basePersonas)}, generate ${batchSize} new unique personas. Each persona should be different from the base personas and from each other. Focus on creating diverse backgrounds, ages, and occupations. Return a JSON array of ${batchSize} personas.`;
+      const prompt = `Project Context: "${project.description}"
+
+Based on the project context above and these ${basePersonas.length} base personas: ${JSON.stringify(basePersonas)}, generate ${batchSize} new unique personas that are specifically relevant to this project's context and goals. Each persona should be different from the base personas and from each other, but all should be potential users or stakeholders for this specific project. Return a JSON array of ${batchSize} personas. Respond in the same language as the project description.`;
 
       try {
         const completion = await openai.chat.completions.create({
@@ -148,7 +151,7 @@ app.post('/api/projects/:projectId/personas/generate', async (req, res) => {
           messages: [
             {
               role: "system",
-              content: "You are a helpful assistant that generates personas. Return only valid JSON array containing personas. Each persona should have: name, age, occupation, location, background, goals, painPoints. Make sure to create diverse and realistic personas with locations from various parts of the world."
+              content: `You are a helpful assistant that generates highly contextual personas. Analyze the project description carefully and ensure all generated personas are relevant to that specific context. Return only valid JSON array containing personas. Each persona should have: name, age, occupation, location, background, goals, painPoints. Make sure to create diverse but contextually appropriate personas. Use the same language as the project description for all content.`
             },
             {
               role: "user",
